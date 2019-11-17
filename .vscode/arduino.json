@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "sketch": "ThermoHygroBaroMeter.ino",
+    "SrialPort": "COM3",
+    "port": "COM3"
+}

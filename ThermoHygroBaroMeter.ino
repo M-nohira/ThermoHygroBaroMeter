@@ -50,6 +50,7 @@ byte num[20] =
         0b01110001, //F 15
         0b01110110, //H 16
         0b00011111, //J 17
+        0b01000000, //- 18
 
 
 };
@@ -117,7 +118,8 @@ void loop()
 
 void SetNum(int nums)
 {
-    buff[0] = num[nums / 1000];
+    
+    buff[0] = nums < 0? num[18]:num[nums / 1000];   //-:num
     buff[1] = num[(nums % 1000) / 100];
     buff[2] = num[(nums % 100) / 10];
     buff[3] = num[(nums % 10)];
