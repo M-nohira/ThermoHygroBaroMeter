@@ -15,7 +15,7 @@
 使用しているのはBOSCHのBME280です. 大体1080円しました.
 
 ## 回路図
-![ThermoHygorBaroMeterCircuit](/image/ThermoHygorBaroMeter.png "回路図")
+![ThermoHygorBaroMeterCircuit](/image/ThermoHygorBaroMeterCircuit.png "回路図")
 
 いたって普通の回路図です。
 
