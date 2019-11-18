@@ -14,15 +14,17 @@
 #define DI3 7
 #define DI4 8
 
+//MODE SETTINGS             ---
 #define MODE_TEMP 0
 #define MODE_HUMI 1
 #define MODE_PRES 2
-
 #define SWITCH_TIME 5000
-#define DELAY 0
-
+//DISPLAY TIMING SETTINGS   ---
 #define DISPLAY_HIGH_DELAY 3
 #define DISPLAY_LOW_DELAY 1
+//DISPLAY SETTINGS          ---
+#define USE_SMALL_DEGREEC 1
+#define USE_FAHRENHEIT 0
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 Adafruit_BME280 bme(BME_CS);
@@ -30,7 +32,7 @@ Adafruit_BME280 bme(BME_CS);
 int mode = MODE_PRES;
 long last_time = 0;
 
-byte num[20] =
+byte num[30] =
     {
         0b00111111, //0
         0b00000110, //1
@@ -51,7 +53,7 @@ byte num[20] =
         0b01110110, //H 16
         0b00011111, //J 17
         0b01000000, //- 18
-
+        0b01011000, //small C 19
 
 };
 
@@ -59,7 +61,6 @@ byte buff[4];
 
 void SetNum(int nums);
 void Set_SR(byte pattern);
-void Toggle_Pin(int pin, int delay);
 void UpdateDisplay(byte display[4]);
 void SetDigOut(int dig);
 
@@ -75,28 +76,35 @@ void setup()
     pinMode(DI4, OUTPUT);
     digitalWrite(SRCLR, HIGH);
     bme.begin();
-
-
-    
 }
 
 void loop()
 {
-    
+
     int dpCNT = 0;
-    
+
     if (last_time + SWITCH_TIME <= millis())
     {
         mode = (mode == MODE_TEMP) ? MODE_HUMI : (mode == MODE_HUMI) ? MODE_PRES : MODE_TEMP;
         last_time = millis();
     }
-    
+
     if (mode == MODE_TEMP)
     {
-        int temp = (bme.readTemperature() * 100); //25.55 => 2555
-        SetNum(temp);
+        float f_temp = bme.readTemperature();
+        if (USE_FAHRENHEIT == 1)
+            f_temp = (f_temp * 1.8) + 32;
+
+        int i_temp = (f_temp * 100); //25.55 => 2555
+
+        SetNum(i_temp);
         dpCNT = 1;
-        buff[3] = num[12]; //C
+        if (USE_FAHRENHEIT == 1)
+            buff[3] = num[15];
+        else if (USE_SMALL_DEGREEC)
+            buff[3] = num[19];
+        else
+            buff[3] = num[12];
     }
     if (mode == MODE_HUMI)
     {
@@ -112,14 +120,13 @@ void loop()
         SetNum(pres);
     }
 
-    
     UpdateDisplay(buff, dpCNT);
 }
 
 void SetNum(int nums)
 {
-    
-    buff[0] = nums < 0? num[18]:num[nums / 1000];   //-:num
+
+    buff[0] = nums < 0 ? num[18] : num[nums / 1000]; //-:num
     buff[1] = num[(nums % 1000) / 100];
     buff[2] = num[(nums % 100) / 10];
     buff[3] = num[(nums % 10)];
@@ -130,14 +137,6 @@ void Set_SR(byte pattern)
     digitalWrite(RCLK, LOW);
     shiftOut(SER, SRCLK, MSBFIRST, pattern);
     digitalWrite(RCLK, HIGH);
-}
-
-void Toggle_Pin(int pin)
-{
-    digitalWrite(pin, LOW);
-    digitalWrite(pin, HIGH);
-    delay(DELAY);
-    digitalWrite(pin, LOW);
 }
 
 void UpdateDisplay(byte display[4], int dp)
