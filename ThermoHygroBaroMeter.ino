@@ -32,7 +32,7 @@ Adafruit_BME280 bme(BME_CS);
 int mode = MODE_PRES;
 long last_time = 0;
 
-byte num[30] =
+byte num[20] =
     {
         0b00111111, //0
         0b00000110, //1
@@ -91,14 +91,41 @@ void loop()
 
     if (mode == MODE_TEMP)
     {
+
         float f_temp = bme.readTemperature();
+        bool isMinus = false;
+        dpCNT = 1;
+
+        //華氏表示用処理===========
         if (USE_FAHRENHEIT == 1)
             f_temp = (f_temp * 1.8) + 32;
+
+        if (f_temp >= 100)
+        {
+            f_temp / 10;
+            dpCNT = 0;
+        }
+        // 氷点下表示用処理==============
+        if (f_temp < 0)
+        {
+            f_temp = abs(f_temp);
+            isMinus = true;
+        }
+        if (f_temp <= -10.00F)
+        {
+            f_temp = abs(f_temp / 10);
+            dpCNT = 0;
+        }
+        //====================================
 
         int i_temp = (f_temp * 100); //25.55 => 2555
 
         SetNum(i_temp);
-        dpCNT = 1;
+
+        if (isMinus == true)
+            buff[0] = 18; //第一桁目をマイナスにする
+
+        //単位表示用設定
         if (USE_FAHRENHEIT == 1)
             buff[3] = num[15];
         else if (USE_SMALL_DEGREEC)
@@ -123,13 +150,13 @@ void loop()
     UpdateDisplay(buff, dpCNT);
 }
 
-void SetNum(int nums)
+void SetNum(int number)
 {
-
-    buff[0] = nums < 0 ? num[18] : num[nums / 1000]; //-:num
-    buff[1] = num[(nums % 1000) / 100];
-    buff[2] = num[(nums % 100) / 10];
-    buff[3] = num[(nums % 10)];
+    int nums[4] = {(number / 1000), ((number % 1000) / 100), ((number % 100) / 10), ((number % 10))};
+    buff[0] = num[nums[0] <= 9 ? nums[0] : 14];
+    buff[1] = num[nums[1] <= 9 ? nums[1] : 14];
+    buff[2] = num[nums[2] <= 9 ? nums[2] : 14];
+    buff[3] = num[nums[3] <= 9 ? nums[3] : 14];
 }
 
 void Set_SR(byte pattern)
