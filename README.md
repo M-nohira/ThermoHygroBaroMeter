@@ -47,3 +47,5 @@ adafuitsのBME280ライブラリを使用しています. インストールし�
 |`DELAY`    |   0   |シフトレジスタの入力用遅延時間|
 |`DISPLAY_HIGH_DELAY` | 3 | ディスプレイのON時間[ms]|
 |`DISPLAY_LOW_DELAY`    | 1 | ディスプレイのOFF時間[ms]|
+|`USE_SMALL_DEGREEC`    |   1   |   Cの小文字を使用する  |
+|`USE_FAHRENHEIT `      |   0   |   華氏を使用する      |
